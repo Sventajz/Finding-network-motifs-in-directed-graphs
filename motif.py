@@ -29,12 +29,12 @@ def create_directed_graph(num_nodes, random_seed=None):
 def visualize_graph(G):
     pos = nx.spring_layout(G) 
     nx.draw(G, pos, with_labels=True, node_size=700, node_color="skyblue", font_size=10, font_color="black", font_weight="bold", arrowsize=20)
-    print(datetime.now() - startTime)
+
     plt.show()
 
 
 if __name__ == "__main__":
-    num_nodes = 50
+    num_nodes = 200
     random_seed = 42 
     G, edges = create_directed_graph(num_nodes, random_seed=random_seed)
 
@@ -57,5 +57,5 @@ if __name__ == "__main__":
                     print('subgraph edges:', subgraphs[j].edges())
 
     print('number of isomorphic graphs: ', numberISO)
-
+    print(datetime.now() - startTime)
     visualize_graph(G)
