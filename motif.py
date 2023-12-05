@@ -5,6 +5,10 @@ import numpy as np
 from datetime import datetime
 startTime = datetime.now()
 
+num_nodes = 50
+random_seed = 42 
+subgraph_size = 4
+
 def find_subgraphs(graph, subgraph_size):
     subgraphs = []
 
@@ -32,24 +36,17 @@ def visualize_graph(G):
 
     plt.show()
 
-
 if __name__ == "__main__":
-    num_nodes = 200
-    random_seed = 42 
-    G, edges = create_directed_graph(num_nodes, random_seed=random_seed)
 
-    subgraph_size = 6
+    G, edges = create_directed_graph(num_nodes, random_seed=random_seed)
     subgraphs = find_subgraphs(G, subgraph_size)
     numberISO = 0
-    isMotif = 0
     for i in range(len(subgraphs)):
         for j in range(i+1, len(subgraphs)):
-
-            if nx.is_isomorphic(subgraphs[i], subgraphs[j]):
-                
+            if nx.is_isomorphic(subgraphs[i], subgraphs[j]):              
                 numberISO+=1
                 if numberISO >=3:
-                    isMotif = 1
+
                     print(f"graphs {i} and {j} are motifs: ")
                     print('subgraph nodes:', subgraphs[i].nodes())
                     print('subgraph edges:', subgraphs[i].edges())
@@ -57,5 +54,8 @@ if __name__ == "__main__":
                     print('subgraph edges:', subgraphs[j].edges())
 
     print('number of isomorphic graphs: ', numberISO)
+    print('motifs: ', motifs)
+    print('motifs: ', motifCount)
+    print('number of motifs: ', len(motifCount))
     print(datetime.now() - startTime)
     visualize_graph(G)
