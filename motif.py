@@ -38,7 +38,7 @@ if __name__ == "__main__":
     random_seed = 42 
     G, edges = create_directed_graph(num_nodes, random_seed=random_seed)
 
-    subgraph_size = 4
+    subgraph_size = 6
     subgraphs = find_subgraphs(G, subgraph_size)
     numberISO = 0
     isMotif = 0
