@@ -7,7 +7,7 @@ from mpi4py import MPI
 
 startTime = datetime.now()
 
-num_nodes = 50
+num_nodes = 200
 random_seed = 42
 subgraph_size = 4
 
@@ -39,7 +39,7 @@ def create_directed_graph(num_nodes, random_seed=None):
     G.add_nodes_from(range(1, num_nodes + 1))
     all_edges = [(i, j) for i in range(1, num_nodes + 1) for j in range(1, num_nodes + 1) if i != j]
     random.shuffle(all_edges)
-    selected_edges = all_edges[:len(all_edges) // 2]
+    selected_edges = all_edges[:len(all_edges) // 25]
     G.add_edges_from(selected_edges)
 
     return G, selected_edges
@@ -86,3 +86,4 @@ print('rank: ', rank)
 print('size: ', size)
 print(datetime.now() - startTime)
 visualize_graph(G, comm)
+## smanjit gustocu
