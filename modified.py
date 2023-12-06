@@ -54,49 +54,35 @@ def visualize_graph(G, comm):
 
     plt.show()
 
-if __name__ == "__main__":
-    comm = MPI.COMM_WORLD
-    rank = comm.Get_rank()
-    size = comm.Get_size()
-
-    G, edges = create_directed_graph(num_nodes, random_seed=random_seed)
-
-    subgraph_size = 4  # Set the subgraph size
-    subgraphs = find_subgraphs(G, subgraph_size, comm)
-
-    local_start = rank * len(subgraphs) // size
-    local_end = (rank + 1) * len(subgraphs) // size
-
-    local_motifs = []
-
-    print(f"Process {rank} handling subgraphs {local_start} to {local_end - 1}")
-
-    for i in range(local_start, local_end):
-        for j in range(i + 1, len(subgraphs)):
-            if nx.is_isomorphic(subgraphs[i], subgraphs[j]):
-                local_motifs.append((i, j))
-
-    print(f"Process {rank} found {len(local_motifs)} isomorphic subgraphs")
-
-    local_motifs_set = set(local_motifs)
-    all_motifs_set = comm.gather(local_motifs_set, root=0)
-
-    if rank == 0:
-        flattened_motifs = list(set.union(*all_motifs_set))
-        numberISO = len(flattened_motifs)
-
-        print(f"Total unique isomorphic graphs: {numberISO}")
-
-        for i, j in flattened_motifs:
-            print(f"Graphs {i} and {j} are isomorphic:")
-            print('Subgraph nodes:', subgraphs[i].nodes())
-            print('Subgraph edges:', subgraphs[i].edges())
-            print('Subgraph nodes:', subgraphs[j].nodes())
-            print('Subgraph edges:', subgraphs[j].edges())
-
-        print('Number of unique isomorphic graphs:', numberISO)
-
-    print('rank: ', rank)
-    print('size: ', size)
-    print(datetime.now() - startTime)
-    visualize_graph(G, comm)
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+size = comm.Get_size()
+G, edges = create_directed_graph(num_nodes, random_seed=random_seed)
+subgraph_size = 4  # Set the subgraph size
+subgraphs = find_subgraphs(G, subgraph_size, comm)
+local_start = rank * len(subgraphs) // size
+local_end = (rank + 1) * len(subgraphs) // size
+local_motifs = []
+print(f"Process {rank} handling subgraphs {local_start} to {local_end - 1}")
+for i in range(local_start, local_end):
+    for j in range(i + 1, len(subgraphs)):
+        if nx.is_isomorphic(subgraphs[i], subgraphs[j]):
+            local_motifs.append((i, j))
+print(f"Process {rank} found {len(local_motifs)} isomorphic subgraphs")
+local_motifs_set = set(local_motifs)
+all_motifs_set = comm.gather(local_motifs_set, root=0)
+if rank == 0:
+    flattened_motifs = list(set.union(*all_motifs_set))
+    numberISO = len(flattened_motifs)
+    print(f"Total unique isomorphic graphs: {numberISO}")
+    for i, j in flattened_motifs:
+        print(f"Graphs {i} and {j} are isomorphic:")
+        print('Subgraph nodes:', subgraphs[i].nodes())
+        print('Subgraph edges:', subgraphs[i].edges())
+        print('Subgraph nodes:', subgraphs[j].nodes())
+        print('Subgraph edges:', subgraphs[j].edges())
+    print('Number of unique isomorphic graphs:', numberISO)
+print('rank: ', rank)
+print('size: ', size)
+print(datetime.now() - startTime)
+visualize_graph(G, comm)
