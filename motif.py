@@ -54,8 +54,6 @@ if __name__ == "__main__":
                     print('subgraph edges:', subgraphs[j].edges())
 
     print('number of isomorphic graphs: ', numberISO)
-    print('motifs: ', motifs)
-    print('motifs: ', motifCount)
-    print('number of motifs: ', len(motifCount))
+
     print(datetime.now() - startTime)
     visualize_graph(G)

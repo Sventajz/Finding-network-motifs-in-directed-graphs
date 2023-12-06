@@ -7,9 +7,9 @@ from mpi4py import MPI
 
 startTime = datetime.now()
 
-num_nodes = 500
+num_nodes = 50
 random_seed = 42
-subgraph_size = 6
+subgraph_size = 4
 
 
 def find_subgraphs(graph, subgraph_size, comm):
@@ -18,11 +18,10 @@ def find_subgraphs(graph, subgraph_size, comm):
     size = comm.Get_size()
 
     local_subgraphs = []
-    for i in range(rank, len(graph) - subgraph_size + 1, size):
+    for i in range(rank, num_nodes - subgraph_size + 1, size):
         subgraph_nodes = list(graph.nodes())[i:i + subgraph_size]
         subgraph = graph.subgraph(subgraph_nodes)
         local_subgraphs.append(subgraph)
-
 
     serialized_subgraphs = [nx.to_dict_of_lists(subgraph) for subgraph in local_subgraphs]
 
@@ -62,32 +61,42 @@ if __name__ == "__main__":
 
     G, edges = create_directed_graph(num_nodes, random_seed=random_seed)
 
+    subgraph_size = 4  # Set the subgraph size
     subgraphs = find_subgraphs(G, subgraph_size, comm)
 
     local_start = rank * len(subgraphs) // size
     local_end = (rank + 1) * len(subgraphs) // size
-    local_isomorphic_results = []
+
+    local_motifs = []
+
+    print(f"Process {rank} handling subgraphs {local_start} to {local_end - 1}")
 
     for i in range(local_start, local_end):
         for j in range(i + 1, len(subgraphs)):
-            isomorphic_result = check_isomorphic_range((i, j, subgraphs))
-            local_isomorphic_results.append(isomorphic_result)
+            if nx.is_isomorphic(subgraphs[i], subgraphs[j]):
+                local_motifs.append((i, j))
 
-    all_isomorphic_results = comm.gather(local_isomorphic_results, root=0)
+    print(f"Process {rank} found {len(local_motifs)} isomorphic subgraphs")
+
+    local_motifs_set = set(local_motifs)
+    all_motifs_set = comm.gather(local_motifs_set, root=0)
 
     if rank == 0:
-        flattened_results = [result for sublist in all_isomorphic_results for result in sublist]
-        numberISO = sum(result[2] for result in flattened_results)
-        isMotif = 1 if numberISO >= 3 else 0
+        flattened_motifs = list(set.union(*all_motifs_set))
+        numberISO = len(flattened_motifs)
 
-        for i, j, is_isomorphic in flattened_results:
-            if is_isomorphic:
-                print(f"graphs {i} and {j} are motifs: ")
-                print('subgraph nodes:', subgraphs[i].nodes())
-                print('subgraph edges:', subgraphs[i].edges())
-                print('subgraph nodes:', subgraphs[j].nodes())
-                print('subgraph edges:', subgraphs[j].edges())
+        print(f"Total unique isomorphic graphs: {numberISO}")
 
-        print('Number of isomorphic graphs:', numberISO)
+        for i, j in flattened_motifs:
+            print(f"Graphs {i} and {j} are isomorphic:")
+            print('Subgraph nodes:', subgraphs[i].nodes())
+            print('Subgraph edges:', subgraphs[i].edges())
+            print('Subgraph nodes:', subgraphs[j].nodes())
+            print('Subgraph edges:', subgraphs[j].edges())
+
+        print('Number of unique isomorphic graphs:', numberISO)
+
+    print('rank: ', rank)
+    print('size: ', size)
     print(datetime.now() - startTime)
     visualize_graph(G, comm)
