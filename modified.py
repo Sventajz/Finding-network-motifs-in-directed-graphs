@@ -7,7 +7,7 @@ from mpi4py import MPI
 
 startTime = datetime.now()
 
-num_nodes = 200
+num_nodes = 500
 random_seed = 42
 subgraph_size = 4
 
