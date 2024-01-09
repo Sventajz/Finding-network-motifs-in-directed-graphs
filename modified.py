@@ -7,7 +7,7 @@ from mpi4py import MPI
 
 startTime = datetime.now()
 
-num_nodes = 500
+num_nodes = 200
 random_seed = 42
 subgraph_size = 4
 
@@ -63,11 +63,25 @@ subgraphs = find_subgraphs(G, subgraph_size, comm)
 local_start = rank * len(subgraphs) // size
 local_end = (rank + 1) * len(subgraphs) // size
 local_motifs = []
+
+
+
+motif_buckets = {}
+motif_counter = {}
+
 print(f"Process {rank} handling subgraphs {local_start} to {local_end - 1}")
 for i in range(local_start, local_end):
     for j in range(i + 1, len(subgraphs)):
         if nx.is_isomorphic(subgraphs[i], subgraphs[j]):
             local_motifs.append((i, j))
+            motif_type = (len(subgraphs[i].nodes()), (len(subgraphs[i].edges)))
+                # Check if the motif type is already a key in the dictionary
+            if motif_type not in motif_buckets:
+                motif_buckets[motif_type] = []
+                motif_counter[motif_type] = 0
+            motif_buckets[motif_type].extend([subgraphs[i], subgraphs[j]])
+            motif_counter[motif_type] += 2
+            
 print(f"Process {rank} found {len(local_motifs)} isomorphic subgraphs")
 local_motifs_set = set(local_motifs)
 all_motifs_set = comm.gather(local_motifs_set, root=0)
@@ -82,6 +96,10 @@ if rank == 0:
         print('Subgraph nodes:', subgraphs[j].nodes())
         print('Subgraph edges:', subgraphs[j].edges())
     print('Number of unique isomorphic graphs:', numberISO)
+
+print(f"Number of motifs: {len(motif_buckets)}")
+for motif_type, graphs in motif_buckets.items():
+    print(f"Motif type: {motif_type}, Count of pairs: {motif_counter[motif_type]}")
 print('rank: ', rank)
 print('size: ', size)
 print(datetime.now() - startTime)

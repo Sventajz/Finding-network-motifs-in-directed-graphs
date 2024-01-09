@@ -40,20 +40,35 @@ def visualize_graph(G):
     plt.show()
 
 
-
+motif_buckets = {}
+motif_counter = {}
 G, edges = create_directed_graph(num_nodes, random_seed=random_seed)
 subgraphs = find_subgraphs(G, subgraph_size)
 numer_iso = 0
 for i in range(len(subgraphs)):
-    for j in range(i+1, len(subgraphs)):
-        if nx.is_isomorphic(subgraphs[i], subgraphs[j]):              
-            numer_iso+=1
-            if numer_iso >=3:
-                print(f"graphs {i} and {j} are motifs: ")
-                print('subgraph nodes:', subgraphs[i].nodes())
-                print('subgraph edges:', subgraphs[i].edges())
-                print('subgraph nodes:', subgraphs[j].nodes())
-                print('subgraph edges:', subgraphs[j].edges())
-print('number of isomorphic graphs: ', numer_iso)
+    for j in range(i + 1, len(subgraphs)):
+        if nx.is_isomorphic(subgraphs[i], subgraphs[j]):
+            numer_iso += 1
+            if numer_iso >= 3:
+                motif_type = (len(subgraphs[i].nodes()), (len(subgraphs[i].edges)))
+                # Check if the motif type is already a key in the dictionary
+                if motif_type not in motif_buckets:
+                    motif_buckets[motif_type] = []
+                    motif_counter[motif_type] = 0
+                motif_buckets[motif_type].extend([subgraphs[i], subgraphs[j]])
+                motif_counter[motif_type] += 2
+
+# Print information about isomorphic graphs in each motif type bucket
+for motif_type, graphs in motif_buckets.items():
+    print(f"Motif type: {motif_type}")
+    for idx, graph in enumerate(graphs):
+        print(f"Graph {idx + 1}:")
+        print('Subgraph nodes:', graph.nodes())
+        print('Subgraph edges:', graph.edges())
+
+print(f"Number of motifs: {len(motif_buckets)}")
+for motif_type, graphs in motif_buckets.items():
+    print(f"Motif type: {motif_type}, Count of pairs: {motif_counter[motif_type]}")
+print('Number of isomorphic graphs: ', numer_iso)
 print(datetime.now() - startTime)
 visualize_graph(G)
