@@ -9,7 +9,7 @@ startTime = datetime.now()
 
 num_nodes = 200
 random_seed = 42
-subgraph_size = 4
+subgraph_size = 10
 
 
 def find_subgraphs(graph, subgraph_size, comm):
@@ -58,7 +58,7 @@ comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 size = comm.Get_size()
 G, edges = create_directed_graph(num_nodes, random_seed=random_seed)
-subgraph_size = 4  # Set the subgraph size
+
 subgraphs = find_subgraphs(G, subgraph_size, comm)
 local_start = rank * len(subgraphs) // size
 local_end = (rank + 1) * len(subgraphs) // size
@@ -75,7 +75,7 @@ for i in range(local_start, local_end):
         if nx.is_isomorphic(subgraphs[i], subgraphs[j]):
             local_motifs.append((i, j))
             motif_type = (len(subgraphs[i].nodes()), (len(subgraphs[i].edges)))
-                # Check if the motif type is already a key in the dictionary
+   
             if motif_type not in motif_buckets:
                 motif_buckets[motif_type] = []
                 motif_counter[motif_type] = 0
@@ -104,4 +104,3 @@ print('rank: ', rank)
 print('size: ', size)
 print(datetime.now() - startTime)
 visualize_graph(G, comm)
-## smanjit gustocu

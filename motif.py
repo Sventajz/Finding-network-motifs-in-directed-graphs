@@ -6,7 +6,7 @@ startTime = datetime.now()
 
 num_nodes = 200
 random_seed = 42 
-subgraph_size = 4
+subgraph_size = 10
 
 def create_directed_graph(num_nodes, random_seed=None):
     random.seed(random_seed)
@@ -51,14 +51,14 @@ for i in range(len(subgraphs)):
             numer_iso += 1
             if numer_iso >= 3:
                 motif_type = (len(subgraphs[i].nodes()), (len(subgraphs[i].edges)))
-                # Check if the motif type is already a key in the dictionary
+
                 if motif_type not in motif_buckets:
                     motif_buckets[motif_type] = []
                     motif_counter[motif_type] = 0
                 motif_buckets[motif_type].extend([subgraphs[i], subgraphs[j]])
                 motif_counter[motif_type] += 2
 
-# Print information about isomorphic graphs in each motif type bucket
+
 for motif_type, graphs in motif_buckets.items():
     print(f"Motif type: {motif_type}")
     for idx, graph in enumerate(graphs):
