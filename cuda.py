@@ -1,6 +1,7 @@
 import networkx as nx
 import random
 import matplotlib.pyplot as plt
+import cupy as cp
 from datetime import datetime
 startTime = datetime.now()
 
@@ -9,15 +10,13 @@ random_seed = 42
 subgraph_size = 4
 
 def create_directed_graph(num_nodes, random_seed=None):
-    random.seed(random_seed)
+    cp.random.seed(random_seed)
     G = nx.DiGraph()
-    G.add_nodes_from(range(1, num_nodes + 1))
+    G.add_nodes_from(cp.arange(1, num_nodes + 1))
     all_edges = [(i, j) for i in range(1, num_nodes + 1) for j in range(1, num_nodes + 1) if i != j]
-    #print(all_edges)
-    random.shuffle(all_edges)
+    all_edges = cp.asarray(all_edges)
+    cp.random.shuffle(all_edges)
     selected_edges = all_edges[:len(all_edges) // 25]
-    print(selected_edges)
-    print(len(selected_edges))
     G.add_edges_from(selected_edges)
     
 
